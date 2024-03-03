@@ -1,0 +1,4 @@
+--- 
+- name: Run kubeadm init command
+  command: kubeadm init --pod-network-cidr=10.10.0.0/16
+

@@ -1,0 +1,6 @@
+---
+# handlers file for create-kube
+- name: load containerd modules
+  service:
+    name: systemd-modules-load
+    state: restarted

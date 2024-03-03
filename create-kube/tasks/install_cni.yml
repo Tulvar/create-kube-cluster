@@ -1,0 +1,34 @@
+---
+- name: Apply Tigera Operator manifest
+  command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml
+
+- name: Download Calico manifest
+  get_url:
+    url: https://docs.projectcalico.org/manifests/calico.yaml
+    dest: /tmp/calico.yaml
+
+- name: Update CIDR in custom-resources.yaml
+  lineinfile:
+    path: /path/to/custom-resources.yaml  
+    regexp: '^cidr: 192\.168\.0\.0/16$'  # Регулярное выражение для поиска строки
+    line: 'cidr: 10.10.0.0/16'  # Заменяемая строка
+
+- name: Apply Calico manifest
+  command: kubectl apply -f /tmp/calico.yaml
+  register: calico_apply_result
+  ignore_errors: true
+
+- name: Check if Calico is already installed
+  shell: kubectl get pods -n calico-system -l k8s-app=calico-node -o name
+  register: calico_pods
+  ignore_errors: true
+
+- name: Wait for Calico pods to be ready
+  wait_for:
+    timeout: 300
+    delay: 10
+    state: started
+    host: "{{ item }}"
+  loop: "{{ calico_pods.stdout_lines }}"
+  when: calico_apply_result is success
+

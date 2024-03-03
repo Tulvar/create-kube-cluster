@@ -1,0 +1,11 @@
+---
+# tasks file for create-kube
+- name: Add NOPASSWD entry for 'sudo su'
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: '{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- include: install_cri.yml
+- include: install_kubeadm.yml
